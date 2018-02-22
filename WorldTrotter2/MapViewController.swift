@@ -9,14 +9,19 @@
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController {
+class MapViewController: UIViewController, MKMapViewDelegate {
     
     var mapView: MKMapView!
+    var button: UIButton!
+    
+    
     override func loadView() {
         // Create a map view
         mapView = MKMapView()
         // Set it as *the* view of this view controller
         view = mapView
+        
+        mapView.delegate = self
         
         let segmentedControl
             = UISegmentedControl(items: ["Standard", "Hybrid", "Satellite"])
@@ -41,6 +46,19 @@ class MapViewController: UIViewController {
         leadingConstraint.isActive = true
         trailingConstraint.isActive = true
         
+        
+        button = UIButton(type: .contactAdd)
+        view.addSubview(button)
+        
+        button.addTarget(self, action: #selector(MapViewController.updateUserLocation), for: .touchDown)
+        
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        let buttonTrailingConstraint = button.trailingAnchor.constraint(equalTo: margins.trailingAnchor)
+        let buttonBottomConstraint = button.bottomAnchor.constraint(equalTo: bottomLayoutGuide.topAnchor, constant: -8)
+        buttonTrailingConstraint.isActive = true
+        buttonBottomConstraint.isActive = true
+        
     }
     
     override func viewDidLoad() {
@@ -58,5 +76,32 @@ class MapViewController: UIViewController {
             mapView.mapType = .satellite
         default:
             break }
+    }
+    
+    @objc func updateUserLocation() {
+        print("updateUserLocation is clicked")
+        
+        let locationManager = CLLocationManager()
+        locationManager.requestWhenInUseAuthorization()
+        
+        mapView.showsUserLocation = true
+    }
+    
+    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+        print("Log: did update user location")
+        let currentLocation = mapView.userLocation.location
+        
+        if let currentLocation = currentLocation {
+            let location = CLLocationCoordinate2DMake(currentLocation.coordinate.latitude, currentLocation.coordinate.longitude)
+            
+            print("Log: currentLocation is \(location)")
+            
+            //mapView.setCenter(location, animated: true)
+            
+            let span = MKCoordinateSpanMake(0.01, 0.01) // 1 degree ~ 0.0175 radian
+            let region = MKCoordinateRegion(center: location, span: span)
+            
+            mapView.setRegion(region, animated: true)
+        }
     }
 }
