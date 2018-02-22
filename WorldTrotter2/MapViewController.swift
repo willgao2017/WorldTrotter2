@@ -45,8 +45,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         topConstraint.isActive = true
         leadingConstraint.isActive = true
         trailingConstraint.isActive = true
-        
-        
+                
         button = UIButton(type: .contactAdd)
         view.addSubview(button)
         
